@@ -1,5 +1,5 @@
 FROM finalduty/archlinux
-# FROM archlinuxjp/archlinux  # local test
+# FROM archlinuxjp/archlinux
 
 MAINTAINER 1m38
 
@@ -7,12 +7,20 @@ RUN pacman -Syu --noconfirm && pacman -S --needed base-devel --noconfirm
 
 RUN pacman -S --noconfirm \
       python python-pip jupyter-notebook git \
-      mathjax pandoc && \
+      mathjax pandoc \
+      haskell-stack r && \
     pacman -Scc --noconfirm
 
 # add user
 RUN useradd -g users -m -s /bin/bash jupyter && echo "jupyter:jupyter" | chpasswd
 USER jupyter
+
+# install ihaskell
+RUN cd ~ && \
+    git clone https://github.com/gibiansky/IHaskell.git ~/IHaskell && \
+    cd ~/IHaskell && \
+    stack setup && stack build && stack install && \
+    ~/.local/bin/ihaskell install
 
 # run jupyter
 RUN mkdir /home/jupyter/notebooks
