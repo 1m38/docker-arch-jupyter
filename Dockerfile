@@ -1,28 +1,17 @@
 FROM finalduty/archlinux
-# FROM archlinuxjp/archlinux
 
 MAINTAINER 1m38
 
-RUN pacman -Syu --noconfirm && pacman -S --needed base-devel --noconfirm && \
+RUN pacman -Syyu --noconfirm && \
     pacman -S --noconfirm \
-      python python-pip jupyter-notebook git \
-      mathjax pandoc \
-      haskell-stack r && \
-    pacman -Scc --noconfirm && \
-    pip install numpy chainer pandas
-
-# add user
-RUN useradd -g users -m -s /bin/bash jupyter && echo "jupyter:jupyter" | chpasswd
-USER jupyter
-
-# install ihaskell
-RUN cd ~ && \
-    git clone https://github.com/gibiansky/IHaskell.git ~/IHaskell && \
-    cd ~/IHaskell && \
-    stack setup && stack build && stack install && \
-    ~/.local/bin/ihaskell install
+      python python-pip git \
+      mathjax pandoc && \
+    pip install jupyter numpy chainer pandas matplotlib && \
+    pacman -Scc --noconfirm
 
 # run jupyter
-RUN mkdir /home/jupyter/notebooks
-CMD ["jupyter", "notebook", "--ip=*", "--port=8888", "--notebook-dir=/home/jupyter/notebooks"]
+RUN mkdir -p /root/jupyter/notebooks
+WORKDIR /root/jupyter/notebooks
+COPY start_jupyter.sh /usr/local/bin
+CMD start_jupyter.sh
 EXPOSE 8888
