@@ -9,9 +9,18 @@ RUN pacman -Syyu --noconfirm && \
     pip install jupyter numpy chainer pandas matplotlib && \
     pacman -Scc --noconfirm
 
-# run jupyter
-RUN mkdir -p /root/jupyter/notebooks
-WORKDIR /root/jupyter/notebooks
+# add user
+RUN useradd -g users -m -s /bin/bash jupyter && echo "jupyter:jupyter" | chpasswd
+USER jupyter
+
+# workdir
+RUN mkdir -p /home/jupyter/notebooks
+
+USER root
 COPY start_jupyter.sh /usr/local/bin
+
+# run jupyter
+USER jupyter
+WORKDIR /home/jupyter/notebooks
 CMD start_jupyter.sh
 EXPOSE 8888
