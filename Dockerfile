@@ -6,12 +6,16 @@ RUN pacman -Syyu --noconfirm && \
     pacman -S --noconfirm \
       python python-pip git \
       mathjax pandoc \
-      haskell-stack make zeromq pkg-config r && \
+      haskell-stack make zeromq pkg-config r \
+      python2 nodejs npm && \
     pip install jupyter numpy chainer pandas matplotlib && \
     pacman -Scc --noconfirm
 
 # setup iRkernel
 RUN R -q -e "install.packages(c('repr', 'IRdisplay', 'crayon', 'pbdZMQ', 'devtools'), repos='http://cran.rstudio.com'); devtools::install_github('IRkernel/IRkernel')"
+
+# install ijavascript
+RUN npm install -g ijavascript && ijs --ijs-install=global
 
 # add user
 RUN useradd -g users -m -s /bin/bash jupyter && echo "jupyter:jupyter" | chpasswd
