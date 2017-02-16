@@ -6,9 +6,12 @@ RUN pacman -Syyu --noconfirm && \
     pacman -S --noconfirm \
       python python-pip git \
       mathjax pandoc \
-      haskell-stack make zeromq pkg-config && \
+      haskell-stack make zeromq pkg-config r && \
     pip install jupyter numpy chainer pandas matplotlib && \
     pacman -Scc --noconfirm
+
+# setup iRkernel
+RUN R -q -e "install.packages(c('repr', 'IRdisplay', 'crayon', 'pbdZMQ', 'devtools'), repos='http://cran.rstudio.com'); devtools::install_github('IRkernel/IRkernel')"
 
 # add user
 RUN useradd -g users -m -s /bin/bash jupyter && echo "jupyter:jupyter" | chpasswd
@@ -21,14 +24,15 @@ RUN cd ~ && \
     stack setup && stack build && stack install && \
     ~/.local/bin/ihaskell install
 
+# install iRkernel
+RUN R -q -e "IRkernel::installspec()"
+
 # workdir
 RUN mkdir -p /home/jupyter/notebooks
 
-USER root
-COPY start_jupyter.sh /usr/local/bin
+COPY start_jupyter.sh /home/jupyter
 
 # run jupyter
-USER jupyter
 WORKDIR /home/jupyter/notebooks
-CMD start_jupyter.sh
+CMD /home/jupyter/start_jupyter.sh
 EXPOSE 8888
